@@ -35,8 +35,16 @@ module ActiveRecord
             end
           end
 
+          def load_records_in_batch_async(loaders)
+            @scope = LoaderRecords.new(loaders, self).load_records_async
+          end
+
+          def load_records_in_keys_async(keys, &block)
+            scope.where(association_key_name => keys).load_async
+          end
+
           def load_records_for_keys(keys, &block)
-            scope.where(association_key_name => keys).load(&block)
+            scope.load(&block)
           end
         end
 
@@ -52,6 +60,10 @@ module ActiveRecord
 
           def records
             load_records + already_loaded_records
+          end
+
+          def load_records_async
+            loader_query.load_records_in_keys_async(keys_to_load)
           end
 
           private

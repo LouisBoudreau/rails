@@ -691,6 +691,7 @@ module ActiveRecord
     #
     #   Post.where(published: true).load # => #<ActiveRecord::Relation>
     def load(&block)
+      # puts "calling load, called from #{caller[0]}"
       if !loaded? || scheduled?
         @records = exec_queries(&block)
         @loaded = true
@@ -905,7 +906,9 @@ module ActiveRecord
       end
 
       def exec_queries(&block)
+        # puts "in exec_queries, called from #{caller[0]}"
         skip_query_cache_if_necessary do
+          puts "in exec_queries, scheduled? #{scheduled?}"
           rows = if scheduled?
             future = @future_result
             @future_result = nil
@@ -945,6 +948,7 @@ module ActiveRecord
       end
 
       def instantiate_records(rows, &block)
+        # puts "Called from #{caller[0]}"
         return [].freeze if rows.empty?
         if eager_loading?
           records = @_join_dependency.instantiate(rows, strict_loading_value, &block).freeze
